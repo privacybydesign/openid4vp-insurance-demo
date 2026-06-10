@@ -1,0 +1,42 @@
+{
+  "issuer": "http://localhost:18081/test-issuer",
+  "credential_issuer": "http://localhost:18081/test-issuer",
+  "display": [
+    { "name": "Yivi Verzekeringen", "locale": "en" },
+    { "name": "Yivi Verzekeringen", "locale": "nl" }
+  ],
+  "authorization_servers": [],
+  "credential_configurations_supported": {
+    "InsurancePseudonymCredentialSdJwt": {
+      "format": "dc+sd-jwt",
+      "scope": "InsurancePseudonymCredentialSdJwt",
+      "extends": "InsurancePseudonymCredential",
+      "cryptographic_binding_methods_supported": ["did:jwk"],
+      "credential_signing_alg_values_supported": ["ES256"],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": ["ES256"]
+        }
+      },
+      "credential_metadata": {
+        "display": [
+          { "name": "Yivi Verzekeringen Klantnummer", "locale": "en" },
+          { "name": "Yivi Verzekeringen Klantnummer", "locale": "nl" }
+        ],
+        "claims": [
+          {
+            "path": ["insurance_id"],
+            "display": [
+              { "name": "Customer ID", "locale": "en" },
+              { "name": "Klantnummer", "locale": "nl" }
+            ]
+          }
+        ]
+      },
+      "display": [
+        { "name": "Yivi Verzekeringen Klantnummer", "locale": "en" },
+        { "name": "Yivi Verzekeringen Klantnummer", "locale": "nl" }
+      ]
+    }
+  }
+}

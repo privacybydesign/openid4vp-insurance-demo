@@ -1,0 +1,167 @@
+# Local dev stack for the Yivi Verzekeringen demo.
+#
+# All wallet-facing services bind to host ports so the phone wallet can reach
+# them via `adb reverse tcp:<port> tcp:<port>` (see scripts/adb-reverse.sh).
+# Service-to-service traffic uses the docker network DNS names directly.
+#
+# Veramo Issuer and Verifier both use did:jwk locally, so no did:web HTTP
+# resolution is needed across containers. The EUDI verifier uses a locally
+# generated self-signed x509 cert with SAN=localhost (see scripts/gen-verifier-cert.sh).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./compose/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  veramo-issuer:
+    image: ghcr.io/privacybydesign/veramo-agent:latest
+    platform: linux/amd64
+    pull_policy: always
+    command: ["yarn", "start"]
+    environment:
+      NODE_ENV: production
+      DB_TYPE: postgres
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+      DB_SCHEMA: agent
+      PORT: "3000"
+      LISTEN_ADDRESS: 0.0.0.0
+      BASEURL: http://localhost:18081
+      PASSPHRASE: abcdefghijklmnopqrstuvwxyz012345
+      CONF_PATH: conf
+    ports:
+      - "18081:3000"
+    volumes:
+      - ./compose/veramo-issuer/conf:/app/conf:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  veramo-verifier:
+    image: ghcr.io/privacybydesign/veramo-verifier:1.6.0
+    platform: linux/amd64
+    pull_policy: always
+    command: ["yarn", "start"]
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+      DB_SCHEMA: verifier
+      PORT: "5000"
+      LISTEN_ADDRESS: 0.0.0.0
+      BASEURL: http://localhost:18082
+      PASSPHRASE: abcdefghijklmnopqrstuvwxyz012345
+      ADMIN_BEARER_TOKEN: veramo-verifier-admin-token
+      CONF_PATH: conf
+    ports:
+      - "18082:5000"
+    volumes:
+      - ./compose/veramo-verifier/conf:/app/conf:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  eudi-verifier:
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-verifier-endpoint-23220-4-kt:v0.6.0
+    platform: linux/amd64
+    pull_policy: always
+    environment:
+      VERIFIER_PUBLICURL: http://localhost:18083
+      VERIFIER_RESPONSE_MODE: DirectPost
+      VERIFIER_CLIENTIDPREFIX: x509_san_dns
+      VERIFIER_JAR_SIGNING_KEY: LoadFromKeystore
+      VERIFIER_JAR_SIGNING_KEY_ALIAS: verifier_cert
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE: file:///mnt/keystore.p12
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE_PASSWORD: changeit
+      VERIFIER_JAR_SIGNING_KEY_KEYSTORE_TYPE: pkcs12
+      VERIFIER_JAR_SIGNING_KEY_PASSWORD: changeit
+      VERIFIER_VALIDATION_SDJWTVC_STATUSCHECK_ENABLED: "false"
+      VERIFIER_ORIGINALCLIENTID: localhost
+    ports:
+      - "18083:8080"
+    volumes:
+      - ./compose/eudi-verifier:/mnt:ro
+
+  backend:
+    build: ./backend
+    command: ["npm", "run", "dev"]
+    environment:
+      # macOS Docker bind mounts don't deliver native fs events; tell tsx-watch's
+      # chokidar to poll so file edits actually trigger restarts.
+      CHOKIDAR_USEPOLLING: "true"
+      PORT: "3001"
+      DB_FILE: /data/db.json
+      DB_SEED_FILE: /app/db.seed.json
+      # All three protocol services on staging — wallets enforce HTTPS so localhost
+      # services don't work end-to-end. The 'local' part of the demo is now just
+      # the frontend + backend + customer DB.
+      VERAMO_ISSUER_URL_INTERNAL: https://veramo-issuer.openid4vc.staging.yivi.app
+      VERAMO_VERIFIER_URL_INTERNAL: https://veramo-verifier.openid4vc.staging.yivi.app
+      EUDI_API_URL_INTERNAL: https://verifierapi-insurance.openid4vc.staging.yivi.app
+      VERAMO_ISSUER_URL_EXTERNAL: https://veramo-issuer.openid4vc.staging.yivi.app
+      VERAMO_VERIFIER_URL_EXTERNAL: https://veramo-verifier.openid4vc.staging.yivi.app
+      EUDI_API_URL_EXTERNAL: https://verifierapi-insurance.openid4vc.staging.yivi.app
+      VERAMO_ISSUER_NAME: insurance-issuer
+      VERAMO_ISSUER_ADMIN_TOKEN: veramo-issuer-admin-token
+      VERAMO_VERIFIER_NAME: insurance-verifier
+      VERAMO_VERIFIER_ADMIN_TOKEN: veramo-verifier-admin-token
+    ports:
+      - "3001:3001"
+    volumes:
+      - dbdata:/data
+      # Live-mount source for tsx-watch dev loop. node_modules stays in the image.
+      - ./backend/src:/app/src:ro
+      - ./backend/db.seed.json:/app/db.seed.json:ro
+      - ./backend/tsconfig.json:/app/tsconfig.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+    depends_on:
+      veramo-issuer:
+        condition: service_started
+      veramo-verifier:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      HOST: 0.0.0.0
+      PORT: "5173"
+      BACKEND_URL: http://backend:3001
+    ports:
+      - "5173:5173"
+    volumes:
+      # Live-mount source for Vite HMR. node_modules stays in the image.
+      - ./frontend/src:/app/src:ro
+      - ./frontend/index.html:/app/index.html:ro
+      - ./frontend/vite.config.ts:/app/vite.config.ts:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json:ro
+      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  dbdata:

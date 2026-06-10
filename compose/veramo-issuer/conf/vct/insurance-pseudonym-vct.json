@@ -1,0 +1,17 @@
+{
+  "path": "/vct/insurance-pseudonym",
+  "credentials": ["InsurancePseudonymCredentialSdJwt"],
+  "document": {
+    "name": "Yivi Verzekeringen Klantnummer",
+    "description": "Pseudonymous customer credential issued by Yivi Verzekeringen",
+    "language": "nl",
+    "display": [
+      { "lang": "nl", "name": "Yivi Verzekeringen Klantnummer" },
+      { "lang": "en", "name": "Yivi Verzekeringen Customer ID" }
+    ],
+    "claims": [
+      { "path": ["insurance_id"], "sd": "allowed" }
+    ],
+    "issuer": "http://localhost:18081/insurance-issuer"
+  }
+}

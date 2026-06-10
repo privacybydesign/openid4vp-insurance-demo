@@ -1,0 +1,16 @@
+{
+  "shortname": "insurance-pseudonym",
+  "name": "Yivi Verzekeringen klantcheck",
+  "purpose": "Het bevestigen van uw klantnummer bij Yivi Verzekeringen",
+  "query": {
+    "credentials": [
+      {
+        "id": "insurance-pseudonym",
+        "format": "vc+sd-jwt",
+        "claims": [
+          { "path": ["insurance_id"] }
+        ]
+      }
+    ]
+  }
+}

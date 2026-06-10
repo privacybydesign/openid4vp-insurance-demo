@@ -1,0 +1,7 @@
+{
+  "name": "test-issuer",
+  "baseUrl": "http://localhost:18081/test-issuer",
+  "adminToken": "veramo-issuer-admin-token",
+  "did": "test-issuer-did",
+  "usesNonces": true
+}

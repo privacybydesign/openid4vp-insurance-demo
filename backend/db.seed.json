@@ -1,0 +1,26 @@
+[
+  {
+    "polisnummer": "12345678",
+    "firstName": "RUBEN ADRIAAN",
+    "lastName": "HENSEN",
+    "dateOfBirth": "1996-05-27",
+    "customerSince": "2018-03-14",
+    "pseudonym": null
+  },
+  {
+    "polisnummer": "87654321",
+    "firstName": "Erika",
+    "lastName": "Mustermann",
+    "dateOfBirth": "1964-08-12",
+    "customerSince": "2020-09-01",
+    "pseudonym": null
+  },
+  {
+    "polisnummer": "11223344",
+    "firstName": "Jan",
+    "lastName": "Janssen",
+    "dateOfBirth": "1972-11-30",
+    "customerSince": "2021-06-15",
+    "pseudonym": null
+  }
+]
