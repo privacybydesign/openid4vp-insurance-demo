@@ -112,8 +112,10 @@ registrerenRouter.post("/:sessionId/polisnummer", async (req: Request, res: Resp
     return
   }
 
-  const insuranceId = generatePseudonym()
-  setPseudonymForPolisnummer(polisnummer, insuranceId)
+  const insuranceId = customer.pseudonym ?? generatePseudonym()
+  if (!customer.pseudonym) {
+    setPseudonymForPolisnummer(polisnummer, insuranceId)
+  }
 
   try {
     const offer = await createPseudonymOffer(insuranceId)
