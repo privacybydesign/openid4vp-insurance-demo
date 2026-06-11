@@ -16,6 +16,10 @@ export function QrCard({ walletLink, openLabel }: { walletLink: string; openLabe
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-foreground)]">
+        <img src="/yivi-logo.svg" alt="Yivi" className="h-6 w-auto" />
+        <span>Scan this QR code with the Yivi App</span>
+      </div>
       <div className="rounded-md border border-[var(--color-border)] bg-white p-3">
         {dataUrl ? (
           <img src={dataUrl} alt="QR code" width={280} height={280} />
