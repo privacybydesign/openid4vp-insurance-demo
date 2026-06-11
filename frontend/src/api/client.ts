@@ -19,6 +19,24 @@ export type RegisterStatus =
     }
   | { state: "complete"; insuranceId: string; polisnummer: string }
 
+export type SignupStatus =
+  | { state: "pending_disclosure"; walletLink: string }
+  | {
+      state: "pending_credential"
+      walletLink: string
+      insuranceId: string
+      polisnummer: string
+      firstName: string
+      lastName: string
+    }
+  | {
+      state: "complete"
+      insuranceId: string
+      polisnummer: string
+      firstName: string
+      lastName: string
+    }
+
 export interface CustomerSummary {
   firstName: string
   lastName: string
@@ -59,6 +77,25 @@ export async function submitPolisnummer(
     if (body?.error === "mismatch") return { error: "mismatch" }
   }
   throw new Error(`polisnummer ${r.status}`)
+}
+
+export async function startSignupSession(
+  products: string[]
+): Promise<{ sessionId: string; walletLink: string }> {
+  const r = await fetch("/api/word-klant/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ products }),
+  })
+  if (!r.ok) throw new Error(`word-klant/start ${r.status}`)
+  return r.json()
+}
+
+export async function getSignupStatus(sessionId: string): Promise<SignupStatus | "expired"> {
+  const r = await fetch(`/api/word-klant/${sessionId}`)
+  if (r.status === 410) return "expired"
+  if (!r.ok) throw new Error(`word-klant/status ${r.status}`)
+  return r.json()
 }
 
 export async function startLoginSession(): Promise<{ sessionId: string; walletLink: string }> {

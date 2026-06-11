@@ -18,11 +18,11 @@ export function TopNav() {
             <Phone className="h-3.5 w-3.5" />
             030 — 123 45 67
           </span>
-          <NavItem to="/registreren" label="Word klant" />
+          <NavItem to="/word-klant" label="Direct verzekerd" />
           <NavItem to="/inloggen" label="Inloggen" primary />
         </nav>
         <nav className="flex gap-1 md:hidden">
-          <NavItem to="/registreren" label="Word klant" />
+          <NavItem to="/word-klant" label="Direct verzekerd" />
           <NavItem to="/inloggen" label="Inloggen" primary />
         </nav>
       </div>

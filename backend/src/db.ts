@@ -29,6 +29,12 @@ export function saveCustomers(customers: Customer[]): void {
   renameSync(tmp, config.dbFile)
 }
 
+export function addCustomer(customer: Customer): void {
+  const customers = loadCustomers()
+  customers.push(customer)
+  saveCustomers(customers)
+}
+
 export function findCustomerByPolisnummer(polisnummer: string): Customer | undefined {
   return loadCustomers().find((c) => c.polisnummer === polisnummer)
 }
