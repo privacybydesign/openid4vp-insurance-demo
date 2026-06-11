@@ -86,14 +86,14 @@ export function Registreren() {
 function Step1Identification({ status }: { status: RegisterStatus | null }) {
   if (!status) {
     return (
-      <StepCard step={1} title="Deel uw paspoort of ID-kaart" status="active">
+      <StepCard step={1} title="Deel uw paspoort, ID-kaart of rijbewijs" status="active">
         <p className="text-sm text-[var(--color-muted-foreground)]">Sessie wordt voorbereid…</p>
       </StepCard>
     )
   }
   if (status.state === "pending_passport") {
     return (
-      <StepCard step={1} title="Deel uw paspoort of ID-kaart" status="active">
+      <StepCard step={1} title="Deel uw paspoort, ID-kaart of rijbewijs" status="active">
         <QrCard walletLink={status.walletLink} openLabel="Open in uw wallet" />
       </StepCard>
     )
@@ -110,9 +110,9 @@ function Step1Identification({ status }: { status: RegisterStatus | null }) {
     const summary = claims
       ? `Geïdentificeerd als ${claims.firstName} ${claims.lastName}.`
       : "Identiteit bevestigd."
-    return <StepCard step={1} title="Deel uw paspoort of ID-kaart" status="done" summary={summary} />
+    return <StepCard step={1} title="Deel uw paspoort, ID-kaart of rijbewijs" status="done" summary={summary} />
   }
-  return <StepCard step={1} title="Deel uw paspoort of ID-kaart" status="pending" />
+  return <StepCard step={1} title="Deel uw paspoort, ID-kaart of rijbewijs" status="pending" />
 }
 
 function Step2Polisnummer({

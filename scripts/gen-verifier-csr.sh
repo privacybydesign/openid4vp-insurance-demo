@@ -63,6 +63,10 @@ RP_JSON=$(jq -nc \
         {
           credential: "pbdf-staging.pbdf.idcard",
           attributes: ["firstName", "lastName", "dateOfBirth"]
+        },
+        {
+          credential: "pbdf-staging.pbdf.drivinglicence",
+          attributes: ["firstName", "lastName", "dateOfBirth"]
         }
       ],
       purpose: {

@@ -12,30 +12,40 @@ export interface PassportPresentation {
   walletLink: string
 }
 
-const passportClaims = [{ path: ["firstName"] }, { path: ["lastName"] }, { path: ["dateOfBirth"] }]
+const identityClaims = [{ path: ["firstName"] }, { path: ["lastName"] }, { path: ["dateOfBirth"] }]
 
-const passportDcql = {
+// The wallet may satisfy the request with any one of: passport, ID card, or
+// driving licence. All three credentials expose firstName / lastName /
+// dateOfBirth in the PBDF staging scheme, so the downstream matching logic is
+// the same regardless of which one the user picks.
+const identityDcql = {
   credentials: [
     {
       id: "passport",
       format: "dc+sd-jwt",
       meta: { vct_values: ["pbdf-staging.pbdf.passport"] },
-      claims: passportClaims,
+      claims: identityClaims,
     },
     {
       id: "idcard",
       format: "dc+sd-jwt",
       meta: { vct_values: ["pbdf-staging.pbdf.idcard"] },
-      claims: passportClaims,
+      claims: identityClaims,
+    },
+    {
+      id: "drivinglicence",
+      format: "dc+sd-jwt",
+      meta: { vct_values: ["pbdf-staging.pbdf.drivinglicence"] },
+      claims: identityClaims,
     },
   ],
-  credential_sets: [{ options: [["passport"], ["idcard"]] }],
+  credential_sets: [{ options: [["passport"], ["idcard"], ["drivinglicence"]] }],
 }
 
 export async function createPassportPresentation(): Promise<PassportPresentation> {
   const body = {
     type: "vp_token",
-    dcql_query: passportDcql,
+    dcql_query: identityDcql,
     nonce: cryptoNonce(),
     jar_mode: "by_reference",
     request_uri_method: "get",
@@ -75,7 +85,7 @@ export async function pollPresentation(transactionId: string): Promise<EudiPollR
   const vpTokens = json.vp_token
   if (!vpTokens) return { status: "pending" }
 
-  const sdjwts = vpTokens.passport ?? vpTokens.idcard
+  const sdjwts = vpTokens.passport ?? vpTokens.idcard ?? vpTokens.drivinglicence
   if (!sdjwts || sdjwts.length === 0) return { status: "pending" }
 
   const claims = parseSdJwtClaims(sdjwts[0]!)
