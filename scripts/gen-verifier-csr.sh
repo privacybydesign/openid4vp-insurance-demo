@@ -58,15 +58,27 @@ RP_JSON=$(jq -nc \
       authorized: [
         {
           credential: "pbdf-staging.pbdf.passport",
-          attributes: ["firstName", "lastName", "dateOfBirth"]
+          attributes: ["firstName", "lastName", "dateOfBirth", "nationality"]
         },
         {
           credential: "pbdf-staging.pbdf.idcard",
-          attributes: ["firstName", "lastName", "dateOfBirth"]
+          attributes: ["firstName", "lastName", "dateOfBirth", "nationality"]
         },
         {
           credential: "pbdf-staging.pbdf.drivinglicence",
-          attributes: ["firstName", "lastName", "dateOfBirth"]
+          attributes: ["firstName", "lastName", "dateOfBirth", "issuingMemberState"]
+        },
+        {
+          credential: "pbdf-staging.pbdf.iban",
+          attributes: ["iban"]
+        },
+        {
+          credential: "pbdf-staging.pbdf.mobilenumber",
+          attributes: ["mobilenumber"]
+        },
+        {
+          credential: "pbdf-staging.pbdf.email",
+          attributes: ["email"]
         }
       ],
       purpose: {
