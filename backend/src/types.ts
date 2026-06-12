@@ -5,6 +5,13 @@ export interface Customer {
   dateOfBirth: string
   customerSince: string
   pseudonym: string | null
+  // Set for customers who signed up themselves via the "Word klant" flow, where
+  // we collect the IBAN from a credential. Existing (seeded) customers may not
+  // have it. Optional so older db.json records remain valid.
+  iban?: string
+  // Product ids chosen in the "Word klant" webshop step (see frontend
+  // lib/products.ts). Optional for the same backward-compat reason.
+  products?: string[]
 }
 
 export interface DisclosedClaims {
@@ -30,6 +37,31 @@ export interface RegisterSession {
   id: string
   createdAt: number
   state: RegisterSessionState
+}
+
+export type SignupSessionState =
+  | { kind: "pending_disclosure"; eudiTransactionId: string; walletLink: string; products: string[] }
+  | {
+      kind: "pending_credential"
+      veramoOfferId: string
+      walletLink: string
+      insuranceId: string
+      polisnummer: string
+      firstName: string
+      lastName: string
+    }
+  | {
+      kind: "complete"
+      insuranceId: string
+      polisnummer: string
+      firstName: string
+      lastName: string
+    }
+
+export interface SignupSession {
+  id: string
+  createdAt: number
+  state: SignupSessionState
 }
 
 export type LoginSessionState =

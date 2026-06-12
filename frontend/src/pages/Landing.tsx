@@ -1,15 +1,6 @@
 import { Link } from "react-router-dom"
-import {
-  ArrowRight,
-  Award,
-  Car,
-  Home,
-  Plane,
-  Shield,
-  Star,
-  Users,
-  type LucideIcon,
-} from "lucide-react"
+import { ArrowRight, Award, Shield, Star, Users, type LucideIcon } from "lucide-react"
+import { PRODUCTS, formatFromPrice, productFromPrice } from "@/lib/products"
 
 export function Landing() {
   return (
@@ -30,18 +21,18 @@ function Hero() {
           Yivi Verzekeringen
         </p>
         <h1 className="mt-3 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-          Voordelig verzekerd,<br />zonder gedoe met polisnummers.
+          Binnen seconden verzekerd,<br />zonder gedoe met polisnummers.
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-white/85">
-          Word vandaag nog klant. Met uw digitale klantenpas logt u voortaan
-          direct in — zonder polisnummers op te zoeken of formulieren in te vullen.
+          Kies uw verzekering en bevestig met uw wallet. Geen formulieren, geen
+          wachttijd — u bent direct verzekerd en logt voortaan in met één scan.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            to="/registreren"
+            to="/word-klant"
             className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-base font-medium text-[var(--color-primary)] shadow-sm hover:bg-white/90"
           >
-            Word klant
+            Direct verzekerd
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
@@ -89,10 +80,15 @@ function Products() {
         </p>
       </div>
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <ProductCard icon={Car} title="Autoverzekering" price="vanaf € 11,- p/m" />
-        <ProductCard icon={Home} title="Inboedelverzekering" price="vanaf € 5,- p/m" />
-        <ProductCard icon={Plane} title="Reisverzekering" price="vanaf € 3,- p/m" />
-        <ProductCard icon={Shield} title="Aansprakelijkheid" price="vanaf € 4,- p/m" />
+        {PRODUCTS.map((p) => (
+          <ProductCard
+            key={p.id}
+            to={`/word-klant?product=${p.id}`}
+            icon={p.icon}
+            title={p.title}
+            price={formatFromPrice(productFromPrice(p))}
+          />
+        ))}
       </div>
     </section>
   )
@@ -152,16 +148,29 @@ function Stat({ icon: Icon, value, label }: { icon: LucideIcon; value: string; l
   )
 }
 
-function ProductCard({ icon: Icon, title, price }: { icon: LucideIcon; title: string; price: string }) {
+function ProductCard({
+  to,
+  icon: Icon,
+  title,
+  price,
+}: {
+  to: string
+  icon: LucideIcon
+  title: string
+  price: string
+}) {
   return (
-    <div className="group rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 transition hover:border-[var(--color-primary)] hover:shadow-sm">
+    <Link
+      to={to}
+      className="group rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 transition hover:border-[var(--color-primary)] hover:shadow-sm"
+    >
       <Icon className="h-8 w-8 text-[var(--color-primary)]" />
       <h3 className="mt-4 text-base font-medium text-[var(--color-foreground)]">{title}</h3>
       <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{price}</p>
       <div className="mt-3 inline-flex items-center text-sm font-medium text-[var(--color-primary)] opacity-0 transition group-hover:opacity-100">
-        Bekijk
+        Verzeker me
         <ArrowRight className="ml-1 h-3.5 w-3.5" />
       </div>
-    </div>
+    </Link>
   )
 }

@@ -74,11 +74,29 @@ export function Inloggen() {
               Onbekende klant. Klantnummer <span className="font-mono">{status.insuranceId}</span> staat niet in onze administratie.
             </p>
             <Link to="/registreren" className="mt-3 inline-block text-sm font-medium text-[var(--color-primary)] underline">
-              Registreer u eerst
+              Registreer uw bestaande polis
             </Link>
           </div>
         )}
       </div>
+
+      {status?.state !== "complete" && (
+        <div className="mt-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)] p-5">
+          <p className="text-sm font-medium text-[var(--color-foreground)]">
+            Al klant, maar nog geen digitale klantenpas?
+          </p>
+          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
+            Bijvoorbeeld als u via een gevolmachtigde verzekerd bent. Identificeer u
+            met uw polisnummer en ontvang uw klantenpas.
+          </p>
+          <Link
+            to="/registreren"
+            className="mt-3 inline-block text-sm font-medium text-[var(--color-primary)] underline"
+          >
+            Registreer uw bestaande polis
+          </Link>
+        </div>
+      )}
     </main>
   )
 }

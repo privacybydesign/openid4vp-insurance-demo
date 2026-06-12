@@ -60,9 +60,14 @@ export function Registreren() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-2xl font-semibold text-[var(--color-primary)]">Registreren</h1>
+      <h1 className="text-2xl font-semibold text-[var(--color-primary)]">Bestaande polis registreren</h1>
       <p className="mt-2 text-[var(--color-muted-foreground)]">
-        Volg de drie stappen om uw digitale klantenpas te ontvangen.
+        Al klant bij Yivi Verzekeringen? Volg de drie stappen om uw digitale
+        klantenpas te ontvangen. Nog niet verzekerd?{" "}
+        <Link to="/word-klant" className="font-medium text-[var(--color-primary)] underline">
+          Verzeker u binnen seconden
+        </Link>
+        .
       </p>
 
       <div className="mt-8 space-y-4">
