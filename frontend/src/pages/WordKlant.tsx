@@ -209,7 +209,7 @@ function Step1Products({
 }
 
 function Step2Disclosure({ status }: { status: SignupStatus | null }) {
-  const title = "Deel uw identiteit en IBAN"
+  const title = "Deel uw identiteit"
   if (!status) {
     return <StepCard step={2} title={title} status="pending" />
   }
@@ -217,13 +217,13 @@ function Step2Disclosure({ status }: { status: SignupStatus | null }) {
     return (
       <StepCard step={2} title={title} status="active">
         <p className="mb-4 text-sm text-[var(--color-muted-foreground)]">
-          Deel uw paspoort, ID-kaart of rijbewijs én uw IBAN uit uw wallet.
+          Deel uw paspoort, ID-kaart of rijbewijs uit uw wallet.
         </p>
         <QrCard walletLink={status.walletLink} openLabel="Open in uw wallet" />
       </StepCard>
     )
   }
-  return <StepCard step={2} title={title} status="done" summary="Identiteit en IBAN ontvangen." />
+  return <StepCard step={2} title={title} status="done" summary="Identiteit ontvangen." />
 }
 
 function Step3Card({ status }: { status: SignupStatus | null }) {
