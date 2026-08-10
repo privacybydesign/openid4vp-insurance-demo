@@ -71,13 +71,20 @@ const identityDcql = {
   ],
 }
 
+// The intended use the verifier image configures out of the box. From v0.11.0 a
+// transaction must name either an intended use or a registration certificate, and the
+// verifier does not check the query against the one it resolves — it only forwards it
+// to the wallet as verifier_info.
+const EUDI_INTENDED_USE_ID = "1"
+
 export async function createPassportPresentation(): Promise<PassportPresentation> {
+  // No request_uri_method: v0.11.0 enforces the method the transaction was started
+  // with, and the deployment defaults to PostOrGet, which accepts either.
   const body = {
-    type: "vp_token",
     dcql_query: identityDcql,
     nonce: cryptoNonce(),
     jar_mode: "by_reference",
-    request_uri_method: "get",
+    intended_use_id: EUDI_INTENDED_USE_ID,
     issuer_chain: STAGING_ISSUER_CHAIN,
   }
 
