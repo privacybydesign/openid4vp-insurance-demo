@@ -13,62 +13,35 @@ export interface PassportPresentation {
 }
 
 // firstName / lastName / dateOfBirth are present on all three identity
-// documents and are what the registration flow matches a customer on. The
-// passport and ID card additionally carry `nationality`; the driving licence
-// has no nationality field, so it carries `issuingMemberState` instead.
+// documents and are what the registration flow matches a customer on.
 const identityBaseClaims = [{ path: ["firstName"] }, { path: ["lastName"] }, { path: ["dateOfBirth"] }]
 
 // The wallet may satisfy the identity requirement with any one of: passport,
-// ID card, or driving licence. Alongside it we require contact and payment
-// details from separate Yivi credentials (IBAN, mobile number, email) — all
-// four credential sets must be satisfied for the request to complete. Every
-// credential + attribute requested here must also be authorized in the
-// verifier's x509 RP-metadata cert (see scripts/gen-verifier-csr.sh).
+// ID card, or driving licence. Every credential + attribute requested here
+// must also be authorized in the verifier's x509 RP-metadata cert (see
+// scripts/gen-verifier-csr.sh).
 const identityDcql = {
   credentials: [
     {
       id: "passport",
       format: "dc+sd-jwt",
       meta: { vct_values: ["pbdf-staging.pbdf.passport"] },
-      claims: [...identityBaseClaims, { path: ["nationality"] }],
+      claims: identityBaseClaims,
     },
     {
       id: "idcard",
       format: "dc+sd-jwt",
       meta: { vct_values: ["pbdf-staging.pbdf.idcard"] },
-      claims: [...identityBaseClaims, { path: ["nationality"] }],
+      claims: identityBaseClaims,
     },
     {
       id: "drivinglicence",
       format: "dc+sd-jwt",
       meta: { vct_values: ["pbdf-staging.pbdf.drivinglicence"] },
-      claims: [...identityBaseClaims, { path: ["issuingMemberState"] }],
-    },
-    {
-      id: "iban",
-      format: "dc+sd-jwt",
-      meta: { vct_values: ["pbdf-staging.pbdf.iban"] },
-      claims: [{ path: ["iban"] }],
-    },
-    {
-      id: "mobilenumber",
-      format: "dc+sd-jwt",
-      meta: { vct_values: ["pbdf-staging.pbdf.mobilenumber"] },
-      claims: [{ path: ["mobilenumber"] }],
-    },
-    {
-      id: "email",
-      format: "dc+sd-jwt",
-      meta: { vct_values: ["pbdf-staging.pbdf.email"] },
-      claims: [{ path: ["email"] }],
+      claims: identityBaseClaims,
     },
   ],
-  credential_sets: [
-    { options: [["passport"], ["idcard"], ["drivinglicence"]] },
-    { options: [["iban"]] },
-    { options: [["mobilenumber"]] },
-    { options: [["email"]] },
-  ],
+  credential_sets: [{ options: [["passport"], ["idcard"], ["drivinglicence"]] }],
 }
 
 export async function createPassportPresentation(): Promise<PassportPresentation> {
@@ -114,8 +87,7 @@ export async function pollPresentation(transactionId: string): Promise<EudiPollR
   const vpTokens = json.vp_token
   if (!vpTokens) return { status: "pending" }
 
-  // The identity document plus the IBAN / mobile / email credentials are all
-  // required; each arrives as its own SD-JWT under its own vp_token key.
+  // The identity document arrives as an SD-JWT under its own vp_token key.
   const identitySdjwts = vpTokens.passport ?? vpTokens.idcard ?? vpTokens.drivinglicence
   if (!identitySdjwts || identitySdjwts.length === 0) return { status: "pending" }
 
@@ -123,11 +95,8 @@ export async function pollPresentation(transactionId: string): Promise<EudiPollR
   const firstName = asString(identity.firstName)
   const lastName = asString(identity.lastName)
   const dateOfBirth = asString(identity.dateOfBirth)
-  const iban = claimFrom(vpTokens.iban, "iban")
-  const mobilenumber = claimFrom(vpTokens.mobilenumber, "mobilenumber")
-  const email = claimFrom(vpTokens.email, "email")
   // Not complete until every required attribute has been disclosed.
-  if (!firstName || !lastName || !dateOfBirth || !iban || !mobilenumber || !email) {
+  if (!firstName || !lastName || !dateOfBirth) {
     return { status: "pending" }
   }
 
@@ -135,12 +104,6 @@ export async function pollPresentation(transactionId: string): Promise<EudiPollR
     firstName,
     lastName,
     dateOfBirth,
-    iban,
-    mobilenumber,
-    email,
-    // passport / ID card carry nationality; the driving licence carries issuingMemberState
-    nationality: asString(identity.nationality),
-    issuingMemberState: asString(identity.issuingMemberState),
   }
   return { status: "complete", claims }
 }
@@ -165,12 +128,6 @@ function disclosures(sdjwt: string): Record<string, unknown> {
 }
 
 const asString = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined)
-
-// Pulls a single named attribute out of an optional credential's SD-JWT.
-function claimFrom(sdjwts: string[] | undefined, name: string): string | undefined {
-  const sdjwt = sdjwts?.[0]
-  return sdjwt ? asString(disclosures(sdjwt)[name]) : undefined
-}
 
 function cryptoNonce(): string {
   // EUDI requires a nonce; for the demo a per-session random value is enough.

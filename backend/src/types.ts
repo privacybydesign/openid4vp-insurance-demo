@@ -5,10 +5,6 @@ export interface Customer {
   dateOfBirth: string
   customerSince: string
   pseudonym: string | null
-  // Set for customers who signed up themselves via the "Word klant" flow, where
-  // we collect the IBAN from a credential. Existing (seeded) customers may not
-  // have it. Optional so older db.json records remain valid.
-  iban?: string
   // Product ids chosen in the "Word klant" webshop step (see frontend
   // lib/products.ts). Optional for the same backward-compat reason.
   products?: string[]
@@ -18,13 +14,6 @@ export interface DisclosedClaims {
   firstName: string
   lastName: string
   dateOfBirth: string
-  iban: string
-  mobilenumber: string
-  email: string
-  // Optional: depends on which identity document was used. nationality comes
-  // from passport / ID card; issuingMemberState from the driving licence.
-  nationality?: string
-  issuingMemberState?: string
 }
 
 export type RegisterSessionState =

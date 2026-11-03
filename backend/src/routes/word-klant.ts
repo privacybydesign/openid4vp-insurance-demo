@@ -49,7 +49,7 @@ wordKlantRouter.get("/:sessionId", async (req: Request, res: Response) => {
     try {
       const result = await pollPresentation(session.state.eudiTransactionId)
       if (result.status === "complete" && result.claims) {
-        const { firstName, lastName, dateOfBirth, iban } = result.claims
+        const { firstName, lastName, dateOfBirth } = result.claims
         const { products } = session.state
 
         // If this person already has a record (e.g. they were really an existing
@@ -67,7 +67,6 @@ wordKlantRouter.get("/:sessionId", async (req: Request, res: Response) => {
             dateOfBirth,
             customerSince: new Date().toISOString().slice(0, 10),
             pseudonym: insuranceId,
-            iban,
             products,
           })
         }
